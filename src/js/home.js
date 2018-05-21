@@ -1,11 +1,12 @@
 import './general';
 import validateRegistrationForm from './services/formValidation/validateRegistrationForm';
+import apiCall from './services/api/apiCall';
 
+import toastr from 'toastr';
+import '../../node_modules/toastr/toastr.less';
 
-class Home{
-    
-    constructor()
-    {
+class Home {
+    constructor() {
         this.$form = document.querySelector('#registrationForm');
         this.$username = document.querySelector('#username');
         this.$email = document.querySelector('#email');
@@ -20,41 +21,63 @@ class Home{
         this.$form.addEventListener('submit', event => {
             this.onFormSubmit(event);
         });
-        
-    }
-    onFormSubmit(event) {
-        event.preventDefault();
-        const formValues = this.getFormValue();
-        const formStatus = validateRegistrationForm(formValues);
-        if(formStatus.isValid){
-            this.clearErrors();
-            this.submitForm(formValues);
-        }else{
-            this.clearErrors();
-            this.highlightErrors(formStatus.result);
-        }
-    };
-
-    clearErrors() {
-        this.$username.parentElement.classList.remove('has-error');
-        this.$phone.parentElement.classList.remove('has-error');
-        this.$email.parentElement.classList.remove('has-error');
-        this.$age.parentElement.classList.remove('has-error');
-        this.$profession.parentElement.classList.remove('has-error');
-        this.$experience.parentElement.classList.remove('has-error');
     }
 
-    getFormValue() {
+    getFormValues() {
         return {
             username: this.$username.value,
             email: this.$email.value,
             phone: this.$phone.value,
             age: this.$age.value,
             profession: this.$profession.value,
-            exerience: parseInt(document.querySelector('input[name="experience"]:checked').value),
+            experience: parseInt(document.querySelector('input[name="experience"]:checked').value),
             comment: this.$comment.value,
+        };
+    }
+
+    onFormSubmit(event) {
+        event.preventDefault();
+
+        const formValues = this.getFormValues();
+        const formStatus = validateRegistrationForm(formValues);
+
+        if (formStatus.isValid) {
+            this.clearErrors();
+            this.submitForm(formValues);
+        } else {
+            this.clearErrors();
+            this.highlightErrors(formStatus.result);
         }
     }
+
+    submitForm(formValues) {
+        this.$submit.classList.add('hidden');
+        this.$loadingIndicator.classList.remove('hidden');
+        apiCall('registration', formValues, 'POST')
+            .then(response => {
+                this.$submit.classList.remove('hidden');
+                this.$loadingIndicator.classList.add('hidden');
+                toastr.success(response.message);
+                this.resetForm();
+                console.log(formValues)
+            })
+            .catch(() => {
+                this.$submit.classList.remove('hidden');
+                this.$loadingIndicator.classList.add('hidden');
+                toastr.error('There was an error during form submission!');
+            });
+    }
+
+    resetForm() {
+        this.$username.value = '';
+        this.$email.value = '';
+        this.$phone.value = '';
+        this.$age.value = '';
+        this.$profession.value = 'school';
+        this.$experience.checked = true;
+        this.$comment.value = '';
+    }
+
     highlightErrors(result) {
         if (!result.username) {
             this.$username.parentElement.classList.add('has-error');
@@ -76,13 +99,17 @@ class Home{
         }
     }
 
-    submitForm(formValues)
-    {
-
+    clearErrors() {
+        this.$username.parentElement.classList.remove('has-error');
+        this.$phone.parentElement.classList.remove('has-error');
+        this.$email.parentElement.classList.remove('has-error');
+        this.$age.parentElement.classList.remove('has-error');
+        this.$profession.parentElement.classList.remove('has-error');
+        this.$experience.parentElement.classList.remove('has-error');
     }
-    
-   
+
 }
+
 window.addEventListener("load", () => {
     new Home();
 });
