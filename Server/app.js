@@ -1,5 +1,7 @@
 const express = require('express'),
   bodyParser = require('body-parser');
+var mongodb = require('mongodb')
+var dbConn = mongodb.MongoClient.connect('mongodb://localhost:27017/register')
 
 const app = express();
 app.use(bodyParser.json());
@@ -15,6 +17,10 @@ app.post('/registration', (req, res, next) => {
   let each;
   for(each in req.body) {
     if(!req.body[each] && each !== 'comment') {
+
+      dbConn.then(db => {
+        db.collection('customers').insertOne(req.Body)
+      })
       res.status(400).json({});
       return next();
     }

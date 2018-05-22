@@ -2,9 +2,12 @@ import './general';
 import validateRegistrationForm from './services/formValidation/validateRegistrationForm';
 import apiCall from './services/api/apiCall';
 
-import toastr from 'toastr';
-import '../../node_modules/toastr/toastr.less';
 
+import toastr from 'toastr';
+import sweetalert from 'sweetalert';
+import '../../node_modules/toastr/toastr.less';
+// var MongoClient = require('mongodb').MongoClient;
+// var url = "mongodb://localhost:27017"
 class Home {
     constructor() {
         this.$form = document.querySelector('#registrationForm');
@@ -57,14 +60,24 @@ class Home {
             .then(response => {
                 this.$submit.classList.remove('hidden');
                 this.$loadingIndicator.classList.add('hidden');
-                toastr.success(response.message);
+                sweetalert({
+                    title: "Form Submission",
+                    text: 'Congratulation! your form was successfully submited and inserted to mongodb',
+                    icon: 'success',
+                    button: 'Return'
+                })
                 this.resetForm();
                 console.log(formValues)
             })
             .catch(() => {
                 this.$submit.classList.remove('hidden');
                 this.$loadingIndicator.classList.add('hidden');
-                toastr.error('There was an error during form submission!');
+                sweetalert({
+                    title: "Form Submission",
+                    icon: 'danger',
+                    text: 'There was an error submitting your form',
+                    button: 'Caancel'
+                })
             });
     }
 
